@@ -44,8 +44,9 @@ export function GroupDetailPage() {
 
   const profiles = members?.map((m) => m.profile) ?? [];
   const stats = computeGroupStats(profiles);
-  const recentMatches = matches?.filter((m) => m.status === 'completed').slice(0, 5) ?? [];
-  const upcomingMatches = matches?.filter((m) => m.status === 'scheduled').slice(0, 5) ?? [];
+  const liveMatches = matches?.filter((m) => m.status === 'in_progress') ?? [];
+  const upcomingMatches = matches?.filter((m) => m.status === 'scheduled') ?? [];
+  const recentMatches = matches?.filter((m) => m.status === 'completed') ?? [];
 
   const handleLeave = async () => {
     if (!user || !groupId) return;
@@ -105,6 +106,16 @@ export function GroupDetailPage() {
               </CardContent>
             </Card>
           </div>
+          {liveMatches.length > 0 && (
+            <Card className="border-green-200 bg-green-50">
+              <CardHeader>
+                <CardTitle className="text-sm text-green-800">Live Matches</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MatchList matches={liveMatches.slice(0, 3)} highlightLive />
+              </CardContent>
+            </Card>
+          )}
           {stats.mostActivePlayer && (
             <Card>
               <CardHeader>
@@ -123,20 +134,27 @@ export function GroupDetailPage() {
 
       {tab === 'matches' && (
         <div className="space-y-4">
+          {liveMatches.length > 0 && (
+            <div>
+              <h4 className="mb-2 text-sm font-semibold text-green-600">Live Now</h4>
+              <MatchList matches={liveMatches} highlightLive />
+            </div>
+          )}
           {upcomingMatches.length > 0 && (
             <div>
-              <h4 className="mb-2 text-sm font-semibold text-slate-500">Upcoming</h4>
+              <h4 className="mb-2 text-sm font-semibold text-slate-500">Scheduled</h4>
               <MatchList matches={upcomingMatches} />
             </div>
           )}
-          <div>
-            <h4 className="mb-2 text-sm font-semibold text-slate-500">Recent</h4>
-            {recentMatches.length === 0 ? (
-              <p className="text-sm text-slate-400">No matches yet</p>
-            ) : (
+          {recentMatches.length > 0 && (
+            <div>
+              <h4 className="mb-2 text-sm font-semibold text-slate-500">Completed</h4>
               <MatchList matches={recentMatches} />
-            )}
-          </div>
+            </div>
+          )}
+          {liveMatches.length === 0 && upcomingMatches.length === 0 && recentMatches.length === 0 && (
+            <p className="py-8 text-center text-sm text-slate-400">No matches yet</p>
+          )}
         </div>
       )}
 
@@ -163,16 +181,22 @@ export function GroupDetailPage() {
   );
 }
 
-function MatchList({ matches }: { matches: Array<{ id: string; status: string; format: string; created_at: string; public_slug: string }> }) {
+function MatchList({
+  matches,
+  highlightLive = false,
+}: {
+  matches: Array<{ id: string; status: string; format: string; created_at: string; public_slug: string }>;
+  highlightLive?: boolean;
+}) {
   return (
     <div className="space-y-2">
       {matches.map((match) => (
         <Link key={match.id} to={`/matches/${match.id}`}>
-          <Card className="transition-shadow hover:shadow-md">
+          <Card className={highlightLive ? 'border-green-300 bg-green-50 transition-shadow hover:shadow-md' : 'transition-shadow hover:shadow-md'}>
             <CardContent className="flex items-center justify-between p-4">
               <div>
                 <Badge variant={match.status === 'in_progress' ? 'success' : 'outline'}>
-                  {match.status.replace('_', ' ')}
+                  {match.status === 'in_progress' ? 'LIVE' : match.status.replace('_', ' ')}
                 </Badge>
                 <p className="mt-1 text-xs text-slate-400">{match.format.toUpperCase()}</p>
               </div>

@@ -71,7 +71,7 @@ export function PublicMatchPage() {
 
   return (
     <div className="min-h-dvh bg-slate-50">
-      <header className="border-b border-slate-200 bg-white px-4 py-3">
+      <header className="safe-top safe-x border-b border-slate-200 bg-white px-4 py-3">
         <div className="mx-auto flex max-w-lg items-center justify-between">
           <div>
             <h1 className="font-bold text-slate-900">Live Match</h1>

@@ -43,8 +43,13 @@ export function useStartMatch() {
 
   return useMutation({
     mutationFn: startMatch,
-    onSuccess: (_data, matchId) => {
+    onSuccess: (data, matchId) => {
       queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+      if (data.group_id) {
+        queryClient.invalidateQueries({ queryKey: ['group-matches', data.group_id] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['group-matches'] });
+      }
     },
   });
 }
@@ -55,8 +60,11 @@ export function useRegisterPoint() {
   return useMutation({
     mutationFn: ({ matchId, winner }: { matchId: string; winner: 'A' | 'B' }) =>
       registerPoint(matchId, winner),
-    onSuccess: (_data, { matchId }) => {
+    onSuccess: (data, { matchId }) => {
       queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+      if (data.group_id) {
+        queryClient.invalidateQueries({ queryKey: ['group-matches', data.group_id] });
+      }
     },
   });
 }
@@ -66,8 +74,11 @@ export function useUndoPoint() {
 
   return useMutation({
     mutationFn: undoLastPoint,
-    onSuccess: (_data, matchId) => {
+    onSuccess: (data, matchId) => {
       queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+      if (data.group_id) {
+        queryClient.invalidateQueries({ queryKey: ['group-matches', data.group_id] });
+      }
     },
   });
 }

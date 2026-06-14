@@ -137,5 +137,6 @@ export function useGroupMatches(groupId: string | undefined) {
       return data ?? [];
     },
     enabled: !!groupId,
+    refetchOnWindowFocus: true,
   });
 }

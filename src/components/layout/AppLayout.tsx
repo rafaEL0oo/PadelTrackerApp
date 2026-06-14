@@ -17,7 +17,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-slate-50">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      <header className="safe-top safe-x sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
         <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
           <Link to="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-white">
@@ -50,7 +50,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-40 w-64 transform bg-white shadow-xl transition-transform md:hidden',
+          'safe-top fixed inset-y-0 right-0 z-40 w-64 transform bg-white shadow-xl transition-transform md:hidden',
           sidebarOpen ? 'translate-x-0' : 'translate-x-full',
         )}
       >
@@ -79,7 +79,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       <main className="mx-auto max-w-lg px-4 pb-24 pt-4">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden">
+      <nav className="safe-bottom safe-x fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-lg items-center justify-around py-2">
           {navItems.map(({ to, icon: Icon, label }) => (
             <Link
@@ -112,12 +112,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 px-4">
+    <div className="safe-top safe-bottom safe-x flex min-h-dvh flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 px-4">
       {children}
     </div>
   );
 }
 
 export function ScoreLayout({ children }: { children: React.ReactNode }) {
-  return <div className="fixed inset-0 z-50 bg-slate-900">{children}</div>;
+  return <div className="safe-top safe-bottom safe-x fixed inset-0 z-50 bg-slate-900">{children}</div>;
 }
