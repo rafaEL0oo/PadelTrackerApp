@@ -17,12 +17,15 @@ interface LiveScoreScreenProps {
 
 export function LiveScoreScreen({ match, players }: LiveScoreScreenProps) {
   const navigate = useNavigate();
-  const { setMatch, setPlayers, updateMatch } = useMatchStore();
+  const { setMatch, setPlayers, updateMatch, match: storeMatch, points, setPoints } = useMatchStore();
   const registerPoint = useRegisterPoint();
   const undoPoint = useUndoPoint();
   const { showToast } = useUIStore();
   const vibrate = useVibrate();
-  const debouncedClick = useDebouncedClick(600);
+  const debouncedPoint = useDebouncedClick(600);
+  const debouncedUndo = useDebouncedClick(300);
+
+  const displayMatch = storeMatch ?? match;
 
   useWakeLock(true);
   useMatchRealtime(match.id);
@@ -33,10 +36,10 @@ export function LiveScoreScreen({ match, players }: LiveScoreScreenProps) {
   }, [match, players, setMatch, setPlayers]);
 
   const handlePoint = (winner: Team) => {
-    debouncedClick(async () => {
+    debouncedPoint(async () => {
       try {
         vibrate(30);
-        const updated = await registerPoint.mutateAsync({ matchId: match.id, winner });
+        const updated = await registerPoint.mutateAsync({ matchId: displayMatch.id, winner });
         updateMatch(updated);
       } catch {
         showToast('Failed to register point', 'error');
@@ -45,13 +48,15 @@ export function LiveScoreScreen({ match, players }: LiveScoreScreenProps) {
   };
 
   const handleUndo = () => {
-    debouncedClick(async () => {
+    debouncedUndo(async () => {
       try {
         vibrate([20, 50, 20]);
-        const updated = await undoPoint.mutateAsync(match.id);
+        const updated = await undoPoint.mutateAsync(displayMatch.id);
         updateMatch(updated);
-      } catch {
-        showToast('Nothing to undo', 'error');
+        setPoints(points.slice(0, -1));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to undo';
+        showToast(message.includes('No points') ? 'Nothing to undo' : 'Failed to undo point', 'error');
       }
     });
   };
@@ -73,7 +78,7 @@ export function LiveScoreScreen({ match, players }: LiveScoreScreenProps) {
           variant="ghost"
           size="sm"
           onClick={handleUndo}
-          disabled={undoPoint.isPending || match.total_points === 0}
+          disabled={undoPoint.isPending || displayMatch.total_points === 0}
           className="text-slate-400 hover:text-white"
         >
           <Undo2 className="mr-1 h-4 w-4" /> Undo
@@ -81,13 +86,13 @@ export function LiveScoreScreen({ match, players }: LiveScoreScreenProps) {
       </div>
 
       <div className="px-4 pb-2">
-        <Scoreboard match={match} players={players} />
+        <Scoreboard match={displayMatch} players={players} />
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
         <button
           onClick={() => handlePoint('A')}
-          disabled={registerPoint.isPending || match.status !== 'in_progress'}
+          disabled={registerPoint.isPending || displayMatch.status !== 'in_progress'}
           className="flex flex-1 flex-col items-center justify-center rounded-3xl bg-blue-600 text-white shadow-lg transition-all active:scale-[0.97] disabled:opacity-50"
         >
           <span className="text-3xl font-black">TEAM A</span>
@@ -99,7 +104,7 @@ export function LiveScoreScreen({ match, players }: LiveScoreScreenProps) {
 
         <button
           onClick={() => handlePoint('B')}
-          disabled={registerPoint.isPending || match.status !== 'in_progress'}
+          disabled={registerPoint.isPending || displayMatch.status !== 'in_progress'}
           className="flex flex-1 flex-col items-center justify-center rounded-3xl bg-orange-600 text-white shadow-lg transition-all active:scale-[0.97] disabled:opacity-50"
         >
           <span className="text-3xl font-black">TEAM B</span>

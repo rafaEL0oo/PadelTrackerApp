@@ -76,6 +76,7 @@ export function useUndoPoint() {
     mutationFn: undoLastPoint,
     onSuccess: (data, matchId) => {
       queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+      queryClient.refetchQueries({ queryKey: ['match', matchId] });
       if (data.group_id) {
         queryClient.invalidateQueries({ queryKey: ['group-matches', data.group_id] });
       }

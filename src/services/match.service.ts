@@ -138,7 +138,8 @@ export async function undoLastPoint(matchId: string) {
 
   const lastPoint = points[0];
 
-  await supabase.from('match_points').delete().eq('id', lastPoint.id);
+  const { error: deleteError } = await supabase.from('match_points').delete().eq('id', lastPoint.id);
+  if (deleteError) throw deleteError;
 
   const { data: allPoints } = await supabase
     .from('match_points')
